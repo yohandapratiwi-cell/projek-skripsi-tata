@@ -320,9 +320,9 @@ export default function MateriPage() {
             {materi?.video_url && (
               <div className="mb-12">
                 {/* KALIMAT TAMBAHAN */}
-                <p className="text-slate-300 text-lg mb-6 font-medium italic">
-                  "Sebelum kita mempraktikkan kodenya, yuk kita pelajari dulu fondasi teorinya! 
-                  Silakan baca dan pahami E-Book di bawah ini, ya."
+                <p className="text-slate-300 text-lg mb-6 font-medium bold">
+                  Sebelum kita mempraktikkan kodenya, yuk kita pelajari dulu fondasi teorinya! 
+                  Silakan baca dan pahami E-Book di bawah ini, ya.
                 </p>
 
                 {/* VIDEO PLAYER */}
