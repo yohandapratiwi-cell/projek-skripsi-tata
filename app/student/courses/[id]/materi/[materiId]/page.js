@@ -318,8 +318,24 @@ export default function MateriPage() {
             <h1 className="text-4xl font-black text-white mb-8 tracking-tighter uppercase italic">{materi?.title}</h1>
 
             {materi?.video_url && (
-              <div className="mb-12 aspect-video rounded-[40px] overflow-hidden border-8 border-slate-900 shadow-2xl bg-black">
-                <iframe width="100%" height="100%" src={materi.video_url.includes('watch?v=') ? materi.video_url.replace('watch?v=', 'embed/') : materi.video_url} title="Video" frameBorder="0" allowFullScreen />
+              <div className="mb-12">
+                {/* KALIMAT TAMBAHAN */}
+                <p className="text-slate-300 text-lg mb-6 font-medium italic">
+                  "Sebelum kita mempraktikkan kodenya, yuk kita pelajari dulu fondasi teorinya! 
+                  Silakan baca dan pahami E-Book di bawah ini, ya."
+                </p>
+
+                {/* VIDEO PLAYER */}
+                <div className="aspect-video rounded-[40px] overflow-hidden border-8 border-slate-900 shadow-2xl bg-black">
+                  <iframe 
+                    width="100%" 
+                    height="100%" 
+                    src={materi.video_url.includes('watch?v=') ? materi.video_url.replace('watch?v=', 'embed/') : materi.video_url} 
+                    title="Video" 
+                    frameBorder="0" 
+                    allowFullScreen 
+                  />
+                </div>
               </div>
             )}
 
