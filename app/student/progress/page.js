@@ -160,16 +160,22 @@ function TestBadge({ label, data, color }) {
 }
 
 function StatusIndicator({ status, score }) {
-  if (!status) return (
+  // 1. Jika memang belum ada status sama sekali
+  if (!status || status === 'not_started') return (
     <div className="flex items-center gap-2 text-slate-600 text-[9px] font-black uppercase italic">
       <AlertCircle size={12} /> <span>Belum Dikerjakan</span>
     </div>
   );
-  if (status === 'submitted' && (score === null || score === undefined)) return (
+
+  // 2. Jika sudah submit, tapi skor benar-benar belum masuk (null, undefined, atau string kosong)
+  // Kita tambahkan pengecekan score === '' atau score === null secara lebih ketat
+  if (status === 'submitted' && (score === null || score === undefined || score === '')) return (
     <div className="flex items-center gap-2 text-orange-500 text-[9px] font-black uppercase italic animate-pulse">
       <Clock size={12} /> <span>Menunggu Nilai</span>
     </div>
   );
+
+  // 3. Jika sudah submit dan score sudah berisi angka (termasuk angka 0 sekalipun)
   return (
     <div className="flex items-center gap-2 text-green-500 text-[9px] font-black uppercase italic">
       <CheckCircle2 size={12} /> <span>Sudah Dinilai</span>
