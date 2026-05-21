@@ -10,8 +10,7 @@ export default function Register() {
   const [form, setForm] = useState({
     name: "",
     email: "",
-    password: "",
-    school_level: ""
+    password: ""
   });
 
   const [message, setMessage] = useState("");
@@ -27,12 +26,6 @@ export default function Register() {
   // Ganti bagian handleSubmit Bapak dengan ini untuk debugging yang lebih baik
 const handleSubmit = async (e) => {
   e.preventDefault();
-  
-  // Validasi sederhana sebelum fetch
-  if (!form.school_level) {
-    setMessage("Please select your school level");
-    return;
-  }
 
   setLoading(true);
   setMessage("");
@@ -108,21 +101,6 @@ const handleSubmit = async (e) => {
                 required
                 className="w-full p-3 mb-4 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500 transition"
               />
-
-
-              {/* SCHOOL LEVEL */}
-              <select
-                name="school_level"
-                value={form.school_level}
-                onChange={handleChange}
-                required
-                className="w-full p-3 mb-6 rounded-lg bg-slate-800 border border-slate-700 focus:outline-none focus:border-blue-500 transition"
-              >
-                <option value="">Select School</option>
-                <option value="SMA">SMA</option>
-                <option value="SMK">SMK</option>
-              </select>
-
 
               <button
                 type="submit"
