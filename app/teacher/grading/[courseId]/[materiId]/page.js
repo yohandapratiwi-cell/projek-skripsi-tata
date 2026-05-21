@@ -58,19 +58,28 @@ export default function StudentListPage() {
 
   const handleSaveGrade = async (e) => {
     e.preventDefault();
-    const score = e.target.score.value;
-    const feedback = e.target.feedback.value;
+    
+    // Ambil nilai score dari input
+    const scoreValue = e.target.score.value;
+    
+    // Karena Bapak belum punya input feedback di form, kita beri nilai default 
+    // atau biarkan kosong agar tidak menyebabkan error .value
+    const feedbackValue = e.target.feedback?.value || "Kerja bagus!";
 
     setIsSaving(true);
     try {
+      // Pastikan ID yang digunakan benar (submission_id)
       await api.put(`/api/teacher/grading/submit/${selectedSub.submission_id}`, {
-        score: parseInt(score),
-        feedback
+        score: Number(scoreValue), // Pastikan jadi angka
+        feedback: feedbackValue
       });
+      
       setIsModalOpen(false);
-      fetchSubmissions(); 
+      fetchSubmissions(); // Refresh daftar siswa
+      alert("Nilai berhasil disimpan!"); // Notifikasi tambahan
     } catch (err) {
-      alert("Gagal simpan nilai");
+      console.error("Gagal simpan nilai:", err.response?.data || err.message);
+      alert("Gagal simpan nilai: " + (err.response?.data?.error || "Cek koneksi database"));
     } finally {
       setIsSaving(false);
     }
@@ -255,6 +264,8 @@ export default function StudentListPage() {
                  })()}
               </div>
 
+              
+              
               {/* SISI KANAN: FORM NILAI */}
               <form onSubmit={handleSaveGrade} className="w-full lg:w-80 space-y-10">
                 <div className="space-y-4">
