@@ -120,14 +120,24 @@ export default function StudentListPage() {
       // 2. JIKA DATA ADALAH CODING
       const code = parsed?.task?.code || parsed?.code || "";
       const output = parsed?.task?.output || parsed?.output || "No output recorded.";
+      
+      // Ambil metrik compile_count dari data kiriman siswa (default ke 0 jika tidak ditemukan)
+      const compileCount = selectedSub?.compile_count || parsed?.task?.compile_count || parsed?.compile_count || 0;
 
       if (code) {
         return (
           <div className="space-y-6">
             <div className="space-y-2">
-              <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-2">
-                <FileCode size={14} /> Source Code
-              </p>
+              {/* Pembungkus judul untuk menyejajarkan metrik compile secara rapi di kanan */}
+              <div className="flex justify-between items-center">
+                <p className="text-[10px] font-black uppercase text-blue-500 tracking-widest flex items-center gap-2">
+                  <FileCode size={14} /> Source Code
+                </p>
+                {/* Informasi Total Compile Tambahan */}
+                <p className="text-[10px] font-black uppercase text-slate-500 tracking-widest">
+                  Total Compile: <span className="text-blue-500">{compileCount}</span>
+                </p>
+              </div>
               <div className="rounded-2xl overflow-hidden border border-slate-800 text-xs">
                 <SyntaxHighlighter 
                   language="cpp" 
@@ -264,8 +274,6 @@ export default function StudentListPage() {
                  })()}
               </div>
 
-              
-              
               {/* SISI KANAN: FORM NILAI */}
               <form onSubmit={handleSaveGrade} className="w-full lg:w-80 space-y-10">
                 <div className="space-y-4">
