@@ -5,12 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { api } from "@/lib/api";
 import { 
   ArrowLeft, BarChart2, CheckCircle2, XCircle, 
-  Target, Zap, BookOpen, Loader2, Calendar
+  Target, Zap, BookOpen, Loader2, Calendar, Info
 } from "lucide-react";
 
 export default function StudentAnalytics() {
   const params = useParams();
-  const studentId = params.studentId; // Mengambil ID dari URL
+  const studentId = params.studentId;
   const router = useRouter();
   
   const [data, setData] = useState(null);
@@ -21,20 +21,13 @@ export default function StudentAnalytics() {
     const fetchAnalytics = async () => {
       try {
         setLoading(true);
-        console.log("Fetching analytics for Student ID:", studentId);
-        
         const res = await api.get(`/api/teacher/analytics/${studentId}`);
-        
-        console.log("Full API Response:", res.data);
-        
-        // Validasi struktur data agar tidak error saat render
         if (res.data && res.data.status === "success") {
           setData(res.data);
         } else {
           setError("Data tidak ditemukan atau format salah");
         }
       } catch (err) {
-        console.error("Fetch Error:", err);
         setError(err.response?.data?.error || "Gagal menghubungi server");
       } finally {
         setLoading(false);
@@ -44,7 +37,6 @@ export default function StudentAnalytics() {
     if (studentId) fetchAnalytics();
   }, [studentId]);
 
-  // Tampilan Loading
   if (loading) return (
     <div className="h-screen bg-slate-950 flex flex-col items-center justify-center text-blue-500">
       <Loader2 className="animate-spin mb-4" size={48} />
@@ -52,7 +44,6 @@ export default function StudentAnalytics() {
     </div>
   );
 
-  // Tampilan Error
   if (error) return (
     <div className="h-screen bg-slate-950 flex flex-col items-center justify-center p-8 text-center">
       <div className="bg-red-500/10 border border-red-500/20 p-8 rounded-[40px] max-w-md">
@@ -112,62 +103,82 @@ export default function StudentAnalytics() {
         </h3>
         
         {data?.data && data.data.length > 0 ? (
-          data.data.map((item) => (
-            <div key={item.materi_id} className="bg-slate-900/50 border border-slate-800 p-8 rounded-[48px] hover:border-blue-500/30 transition-all group shadow-xl">
-              <div className="flex flex-col md:flex-row justify-between gap-6 mb-8">
-                <div className="flex-1">
-                  <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-2 mb-2">
-                    <BookOpen size={12} /> {item.module_title}
-                  </span>
-                  <h4 className="text-2xl font-black text-white uppercase tracking-tight italic">{item.materi_title}</h4>
-                </div>
-                <div className="text-right">
-                  <div className="text-3xl font-black text-white italic group-hover:text-blue-500 transition-colors">
-                    {item.progress?.percent ?? 0}%
+          data.data.map((item) => {
+            // Cek apakah materi ini memiliki indikator penilaian
+            const hasIndicators = item.progress?.total > 0;
+
+            return (
+              <div key={item.materi_id} className="bg-slate-900/50 border border-slate-800 p-8 rounded-[48px] hover:border-blue-500/30 transition-all group shadow-xl">
+                <div className="flex flex-col md:flex-row justify-between gap-6 mb-8">
+                  <div className="flex-1">
+                    <span className="text-[10px] font-black text-blue-500 uppercase tracking-widest italic flex items-center gap-2 mb-2">
+                      <BookOpen size={12} /> {item.module_title}
+                    </span>
+                    <h4 className="text-2xl font-black text-white uppercase tracking-tight italic">{item.materi_title}</h4>
                   </div>
-                  <div className="text-[9px] font-black uppercase text-slate-600 tracking-widest">Mastery Level</div>
-                </div>
-              </div>
-
-              {/* PROGRESS BAR */}
-              <div className="w-full h-3 bg-slate-950 rounded-full mb-8 p-1 overflow-hidden">
-                <div 
-                  className="h-full bg-gradient-to-r from-blue-600 to-indigo-500 rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.4)]"
-                  style={{ width: `${item.progress?.percent ?? 0}%` }}
-                ></div>
-              </div>
-
-              {/* INDICATORS GRID */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {item.details?.all_indicators && item.details.all_indicators.length > 0 ? (
-                  item.details.all_indicators.map((ind, idx) => {
-                    const isAchieved = item.details.achieved_indicators?.includes(ind);
-                    return (
-                      <div 
-                        key={idx} 
-                        className={`flex items-center gap-4 p-4 rounded-3xl border transition-all ${
-                          isAchieved 
-                          ? "bg-blue-600/5 border-blue-500/20 text-white shadow-[0_0_20px_rgba(37,99,235,0.05)]" 
-                          : "bg-slate-950/50 border-slate-800 text-slate-600"
-                        }`}
-                      >
-                        {isAchieved ? (
-                          <CheckCircle2 size={20} className="text-blue-500 shrink-0" />
-                        ) : (
-                          <XCircle size={20} className="text-slate-800 shrink-0 opacity-40" />
-                        )}
-                        <span className="text-xs font-bold italic tracking-tight">{ind}</span>
+                  <div className="text-right">
+                    {/* HANYA tampilkan persen jika ada indikator, jika tidak tampilkan label INFO */}
+                    {hasIndicators ? (
+                      <>
+                        <div className="text-3xl font-black text-white italic group-hover:text-blue-500 transition-colors">
+                          {item.progress?.percent ?? 0}%
+                        </div>
+                        <div className="text-[9px] font-black uppercase text-slate-600 tracking-widest">Mastery Level</div>
+                      </>
+                    ) : (
+                      <div className="flex flex-col items-end">
+                        <div className="px-4 py-1 bg-slate-800 rounded-full text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                          <Info size={10} /> Reading Material
+                        </div>
                       </div>
-                    );
-                  })
-                ) : (
-                  <div className="col-span-2 p-4 bg-slate-950/30 rounded-2xl border border-dashed border-slate-800 text-center">
-                    <p className="text-[10px] font-black uppercase text-slate-700 italic">No specific indicators for this unit</p>
+                    )}
                   </div>
-                )}
+                </div>
+
+                {/* PROGRESS BAR: Sembunyikan atau buat statis jika tidak ada indikator */}
+                <div className="w-full h-3 bg-slate-950 rounded-full mb-8 p-1 overflow-hidden">
+                  <div 
+                    className={`h-full rounded-full transition-all duration-1000 ease-out shadow-[0_0_15px_rgba(37,99,235,0.4)] ${
+                      hasIndicators ? "bg-gradient-to-r from-blue-600 to-indigo-500" : "bg-slate-800"
+                    }`}
+                    style={{ width: `${hasIndicators ? (item.progress?.percent ?? 0) : 100}%` }}
+                  ></div>
+                </div>
+
+                {/* INDICATORS GRID */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {hasIndicators ? (
+                    item.details.all_indicators.map((ind, idx) => {
+                      const isAchieved = item.details.achieved_indicators?.includes(ind);
+                      return (
+                        <div 
+                          key={idx} 
+                          className={`flex items-center gap-4 p-4 rounded-3xl border transition-all ${
+                            isAchieved 
+                            ? "bg-blue-600/5 border-blue-500/20 text-white shadow-[0_0_20px_rgba(37,99,235,0.05)]" 
+                            : "bg-slate-950/50 border-slate-800 text-slate-600"
+                          }`}
+                        >
+                          {isAchieved ? (
+                            <CheckCircle2 size={20} className="text-blue-500 shrink-0" />
+                          ) : (
+                            <XCircle size={20} className="text-slate-800 shrink-0 opacity-40" />
+                          )}
+                          <span className="text-xs font-bold italic tracking-tight">{ind}</span>
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-2 p-6 bg-slate-950/30 rounded-[32px] border border-dashed border-slate-800 text-center">
+                      <p className="text-[10px] font-black uppercase text-slate-700 italic tracking-[0.2em]">
+                        Materi ini bersifat informasi/pengantar. Tidak ada penilaian kompetensi teknis.
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          ))
+            );
+          })
         ) : (
           <div className="p-20 text-center bg-slate-900/30 rounded-[40px] border border-dashed border-slate-800">
              <p className="text-slate-600 font-black uppercase tracking-widest text-[10px]">No learning history found for this student</p>
