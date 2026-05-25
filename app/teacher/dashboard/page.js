@@ -61,6 +61,9 @@ export default function TeacherDashboard() {
       try {
         const res = await api.get(`/api/teacher/course-progress/${selectedCourse}`);
         const result = res.data?.data || res.data || [];
+        
+        // ✅ Sinkronisasi Logika: Kita pastikan data yang masuk ke chart 
+        // adalah array yang valid untuk Recharts
         setChartData(Array.isArray(result) ? result : []);
       } catch (err) {
         console.error("Gagal mengambil data grafik:", err);
@@ -143,27 +146,57 @@ export default function TeacherDashboard() {
               <Loader2 className="animate-spin text-blue-500" size={32} />
             </div>
           )}
-          <ResponsiveContainer width="100%" height="100%">
-            <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <defs>
-                <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.5} />
-              <XAxis dataKey="module_name" stroke="#475569" fontSize={10} tickLine={false} axisLine={false} dy={15} fontWeight="900" textTransform="uppercase"/>
-              <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} dx={-10} fontWeight="900"/>
-              <Tooltip 
-                contentStyle={{ backgroundColor: "#020617", border: "1px solid #1e293b", borderRadius: "24px", padding: "16px" }}
-                itemStyle={{ color: "#3b82f6", fontWeight: "900", textTransform: "uppercase", fontSize: "10px" }}
-              />
-              <Area type="monotone" dataKey="completed_count" stroke="#3b82f6" strokeWidth={6} fillOpacity={1} fill="url(#colorStudents)" dot={{ r: 6, fill: "#3b82f6", stroke: "#020617", strokeWidth: 3 }} activeDot={{ r: 10, strokeWidth: 0 }} />
-            </AreaChart>
-          </ResponsiveContainer>
+          
+          {/* ✅ Deteksi Jika Data Kosong */}
+          {chartData.length === 0 && !chartLoading ? (
+             <div className="h-full flex items-center justify-center border-2 border-dashed border-slate-800 rounded-[40px]">
+                <p className="text-slate-600 font-black uppercase text-[10px] tracking-widest italic">No progress data available for this course</p>
+             </div>
+          ) : (
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="colorStudents" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/><stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" vertical={false} opacity={0.5} />
+                <XAxis 
+                  dataKey="module_name" 
+                  stroke="#475569" 
+                  fontSize={9} 
+                  tickLine={false} 
+                  axisLine={false} 
+                  dy={15} 
+                  fontWeight="900" 
+                  tickFormatter={(value) => value.length > 15 ? `${value.substring(0, 15)}...` : value}
+                />
+                <YAxis stroke="#475569" fontSize={10} tickLine={false} axisLine={false} dx={-10} fontWeight="900"/>
+                <Tooltip 
+                  contentStyle={{ backgroundColor: "#020617", border: "1px solid #1e293b", borderRadius: "24px", padding: "16px" }}
+                  itemStyle={{ color: "#3b82f6", fontWeight: "900", textTransform: "uppercase", fontSize: "10px" }}
+                  cursor={{ stroke: '#1e293b', strokeWidth: 2 }}
+                  formatter={(value) => [`${value} Students Finished`, "Progress"]}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="completed_count" 
+                  stroke="#3b82f6" 
+                  strokeWidth={6} 
+                  fillOpacity={1} 
+                  fill="url(#colorStudents)" 
+                  dot={{ r: 6, fill: "#3b82f6", stroke: "#020617", strokeWidth: 3 }} 
+                  activeDot={{ r: 10, strokeWidth: 0 }} 
+                  animationDuration={1500}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          )}
         </div>
       </div>
 
       {/* SECTION 2: CLASS COMPETENCY RADAR */}
+      {/* Komponen ini akan otomatis memfilter unit tanpa indikator jika query SQL backend sudah Bapak perbaiki */}
       <ClassCompetencyRadar />
 
     </div>
