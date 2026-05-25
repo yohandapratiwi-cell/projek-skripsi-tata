@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation"; // ✅ Import router
 import { api } from "@/lib/api";
-import { Users, BookOpen, Loader2, BarChart2, ArrowRight } from "lucide-react"; // ✅ Ikon baru
+import { Users, BookOpen, Loader2, BarChart2, ArrowRight, MessageSquare } from "lucide-react"; // ✅ Tambah ikon MessageSquare untuk refleksi
 
 export default function StudentMonitor() {
   const [students, setStudents] = useState([]);
@@ -84,14 +84,25 @@ export default function StudentMonitor() {
                   <td className="p-8 text-xs font-black uppercase tracking-widest text-emerald-500">
                     Streak: {s.current_streak || 0} Days 🔥
                   </td>
-                  {/* ✅ TOMBOL AKSI BARU */}
+                  {/* ✅ PENYELARASAN TOMBOL AKSI BARU */}
                   <td className="p-8 text-right">
-                    <button 
-                      onClick={() => router.push(`/teacher/students/${s.id}/analytics`)}
-                      className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 ml-auto transition-all active:scale-95 shadow-lg shadow-blue-600/20"
-                    >
-                      <BarChart2 size={16} /> Analytics <ArrowRight size={14} />
-                    </button>
+                    <div className="flex items-center justify-end gap-3">
+                      {/* Tombol View Reflection Baru */}
+                      <button 
+                        onClick={() => router.push(`/teacher/students/${s.id}/reflections`)}
+                        className="bg-slate-800 hover:bg-purple-600 text-white px-5 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95"
+                      >
+                        <MessageSquare size={14} /> Reflection
+                      </button>
+
+                      {/* Tombol Analytics Bawaan Bapak */}
+                      <button 
+                        onClick={() => router.push(`/teacher/students/${s.id}/analytics`)}
+                        className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-3 transition-all active:scale-95 shadow-lg shadow-blue-600/20"
+                      >
+                        <BarChart2 size={16} /> Analytics <ArrowRight size={14} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))
