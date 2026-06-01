@@ -107,10 +107,6 @@ export default function TeacherNavbar() {
             </div>
 
             <div className="p-1">
-              <button className="flex items-center gap-2 w-full px-4 py-2 hover:bg-slate-800 text-sm text-slate-300 rounded-lg transition">
-                <User size={16} className="text-indigo-400" /> Profile Settings
-              </button>
-
               <button
                 onClick={handleLogout}
                 className="flex items-center gap-2 w-full px-4 py-2 hover:bg-red-600/10 text-sm text-red-400 hover:text-red-300 transition rounded-lg mt-1 font-bold"
