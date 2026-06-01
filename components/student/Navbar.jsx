@@ -104,11 +104,6 @@ export default function StudentNavbar({ collapsed }) {
                 </p>
               </div>
               <div className="p-3">
-                <button className="flex items-center gap-2 w-full px-4 py-3 text-sm font-medium text-slate-300 hover:bg-slate-800 hover:text-white rounded-2xl transition-all group">
-                  <User size={18} className="text-slate-500 group-hover:text-blue-500" />
-                  Lihat Profil
-                </button>
-                <hr className="my-2 border-slate-800" />
                 <button
                   onClick={handleLogout}
                   className="flex items-center gap-2 w-full px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-500/10 rounded-2xl transition-all group"
