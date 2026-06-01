@@ -109,7 +109,7 @@ export default function StudentNavbar({ collapsed }) {
                   className="flex items-center gap-2 w-full px-4 py-3 text-sm font-bold text-red-500 hover:bg-red-500/10 rounded-2xl transition-all group"
                 >
                   <LogOut size={18} className="group-hover:-translate-x-1 transition-transform" />
-                  Logout
+                  Logoutt
                 </button>
               </div>
             </div>
