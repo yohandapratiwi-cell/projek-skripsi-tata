@@ -298,17 +298,39 @@ export default function MateriPage() {
         <aside className="w-80 bg-slate-900/50 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto p-6 space-y-4 font-black italic">
           {modules.map((module, mIdx) => (
             <div key={module.id} className="space-y-2">
-              <button onClick={() => toggleModule(module.id)} className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800 transition-all border border-slate-700/50">
-                <span className="text-sm font-black text-white uppercase tracking-tight text-left">{mIdx + 1}. {module.title}</span>
-                {openModules[module.id] ? <ChevronDown size={18}/> : <ChevronRight size={18}/>}
-              </button>
-              {openModules[module.id] && (
-                <div className="pl-4 space-y-1">
-                  {module.materi?.map((item) => (
-                    <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${item.id == params.materiId ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"}`} onClick={() => router.push(`/student/courses/${params.id}/materi/${item.id}`)}><FileText size={14} /><span className="truncate">{item.title}</span></div>
-                  ))}
-                </div>
-              )}
+              {/* 1. Mengubah <button> menjadi <div> agar tidak bisa diklik.
+                  2. Menghapus onClick={() => toggleModule(module.id)}.
+                  3. Menghapus 'cursor-pointer' (jika ada) agar kursor tidak berubah jadi jari.
+              */}
+              <div className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-800/20 border border-slate-700/50 opacity-80">
+                <span className="text-sm font-black text-white uppercase tracking-tight text-left">
+                  {mIdx + 1}. {module.title}
+                </span>
+                {/* Karena sekarang tidak bisa diklik, kita buat daftar materi 
+                    selalu terbuka (Force Open) atau ikonnya statis saja.
+                */}
+                <ChevronDown size={18} className="text-slate-600"/>
+              </div>
+
+              {/* Daftar materi di bawah ini akan selalu muncul 
+                  tanpa perlu menunggu status openModules lagi.
+              */}
+              <div className="pl-4 space-y-1">
+                {module.materi?.map((item) => (
+                  <div 
+                    key={item.id} 
+                    className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${
+                      item.id == params.materiId 
+                      ? "bg-blue-600 text-white shadow-lg" 
+                      : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"
+                    }`} 
+                    onClick={() => router.push(`/student/courses/${params.id}/materi/${item.id}`)}
+                  >
+                    <FileText size={14} />
+                    <span className="truncate">{item.title}</span>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </aside>
