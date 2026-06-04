@@ -298,14 +298,28 @@ export default function MateriPage() {
         <aside className="w-80 bg-slate-900/50 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto p-6 space-y-4 font-black italic">
           {modules.map((module, mIdx) => (
             <div key={module.id} className="space-y-2">
-              <button onClick={() => toggleModule(module.id)} className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800 transition-all border border-slate-700/50">
+              <button 
+                onClick={() => toggleModule(module.id)} 
+                className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800 transition-all border border-slate-700/50"
+              >
                 <span className="text-sm font-black text-white uppercase tracking-tight text-left">{mIdx + 1}. {module.title}</span>
                 {openModules[module.id] ? <ChevronDown size={18}/> : <ChevronRight size={18}/>}
               </button>
+
               {openModules[module.id] && (
                 <div className="pl-4 space-y-1">
                   {module.materi?.map((item) => (
-                    <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${item.id == params.materiId ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"}`} onClick={() => router.push(`/student/courses/${params.id}/materi/${item.id}`)}><FileText size={14} /><span className="truncate">{item.title}</span></div>
+                    <div 
+                      key={item.id} 
+                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${
+                        item.id == params.materiId 
+                        ? "bg-blue-600 text-white shadow-lg" 
+                        : "text-slate-500 hover:bg-slate-800/10" 
+                      }`}
+                    >
+                      <FileText size={14} />
+                      <span className="truncate">{item.title}</span>
+                    </div>
                   ))}
                 </div>
               )}
