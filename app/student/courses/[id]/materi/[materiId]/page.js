@@ -295,32 +295,42 @@ export default function MateriPage() {
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <aside className="w-80 bg-slate-900/50 border-r border-slate-800 flex flex-col shrink-0 overflow-y-auto p-6 space-y-4 font-black italic">
+        <aside className="w-80 flex flex-col shrink-0 overflow-y-auto border-r border-slate-800 bg-slate-900/50 p-6 space-y-4 font-black italic">
           {modules.map((module, mIdx) => (
             <div key={module.id} className="space-y-2">
+              
+              {/* TOMBOL UTAMA: MODUL KURSUS */}
               <button 
                 onClick={() => toggleModule(module.id)} 
-                className="w-full flex items-center justify-between p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800 transition-all border border-slate-700/50"
+                className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-700/50 bg-slate-800/40 hover:bg-slate-800 transition-all"
               >
-                <span className="text-sm font-black text-white uppercase tracking-tight text-left">{mIdx + 1}. {module.title}</span>
-                {openModules[module.id] ? <ChevronDown size={18}/> : <ChevronRight size={18}/>}
+                <span className="text-sm font-black text-left text-white uppercase tracking-tight">
+                  {mIdx + 1}. {module.title}
+                </span>
+                {openModules[module.id] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </button>
 
+              {/* DROPDOWN LIST: SUB-BAB MATERI */}
               {openModules[module.id] && (
                 <div className="pl-4 space-y-1">
-                  {module.materi?.map((item) => (
-                    <div 
-                      key={item.id} 
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${
-                        item.id == params.materiId 
-                        ? "bg-blue-600 text-white shadow-lg" 
-                        : "text-slate-500 hover:bg-slate-800/10" 
-                      }`}
-                    >
-                      <FileText size={14} />
-                      <span className="truncate">{item.title}</span>
-                    </div>
-                  ))}
+                  {module.materi?.map((item) => {
+                    const isActive = item.id == params.materiId;
+                    
+                    return (
+                      <div 
+                        key={item.id} 
+                        onClick={() => router.push(`/student/courses/${params.id}/materi/${item.id}`)}
+                        className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${
+                          isActive 
+                            ? "bg-blue-600 text-white shadow-lg" 
+                            : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"
+                        }`}
+                      >
+                        <FileText size={14} />
+                        <span className="truncate">{item.title}</span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
