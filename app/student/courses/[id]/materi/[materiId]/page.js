@@ -66,6 +66,13 @@ export default function MateriPage() {
     setOpenModules(prev => ({ ...prev, [modId]: !prev[modId] }));
   };
 
+  // ✅ AKSI HAPUS NODE KHUSUS MOBILE / DESKTOP (Tombol X Manual)
+  const handleDeleteNode = useCallback((nodeId) => {
+    if (isSubmitted) return;
+    setNodes((nds) => nds.filter((n) => n.id !== nodeId));
+    setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
+  }, [setNodes, setEdges, isSubmitted]);
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -138,6 +145,7 @@ export default function MateriPage() {
                   ...node,
                   data: {
                     ...node.data,
+                    onDeleteMobile: () => handleDeleteNode(node.id), // Restore aksi hapus
                     onChange: (newLabel) => {
                       setNodes((nds) =>
                         nds.map((n) => (n.id === node.id ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -158,7 +166,7 @@ export default function MateriPage() {
     };
     
     if (params?.id && params?.materiId) fetchData();
-  }, [params.id, params.materiId]);
+  }, [params.id, params.materiId, handleDeleteNode]);
 
   useEffect(() => {
     if (!materi) return;
@@ -217,6 +225,7 @@ export default function MateriPage() {
       id: newNodeId, type, position, 
       data: { 
         label,
+        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -225,13 +234,11 @@ export default function MateriPage() {
       } 
     };
     setNodes((nds) => nds.concat(newNode));
-  }, [reactFlowInstance, setNodes, isSubmitted]);
+  }, [reactFlowInstance, setNodes, isSubmitted, handleDeleteNode]);
 
-  // ✅ HANDLER KHUSUS MOBILE: Menambahkan node ke area kerja melalui ketukan (Click-to-Add)
   const onAddNodeMobile = useCallback((type, label) => {
     if (isSubmitted) return;
     
-    // Menaruh posisi node baru di koordinat tengah canvas pengerjaan siswa
     const position = reactFlowInstance 
       ? reactFlowInstance.getViewport()
       : { x: 150, y: 150 };
@@ -250,6 +257,7 @@ export default function MateriPage() {
       position: computedPosition,
       data: {
         label,
+        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual di mobile
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -258,7 +266,7 @@ export default function MateriPage() {
       }
     };
     setNodes((nds) => nds.concat(newNode));
-  }, [reactFlowInstance, setNodes, isSubmitted]);
+  }, [reactFlowInstance, setNodes, isSubmitted, handleDeleteNode]);
 
   const handleRunCode = async () => {
     if (isCompiling || isSubmitted) return;
@@ -324,8 +332,6 @@ export default function MateriPage() {
         <aside className="w-80 flex flex-col shrink-0 overflow-y-auto border-r border-slate-800 bg-slate-900/50 p-6 space-y-4 font-black italic">
           {modules.map((module, mIdx) => (
             <div key={module.id} className="space-y-2">
-              
-              {/* TOMBOL UTAMA: MODUL KURSUS */}
               <button 
                 onClick={() => toggleModule(module.id)} 
                 className="w-full flex items-center justify-between p-4 rounded-xl border border-slate-700/50 bg-slate-800/40 hover:bg-slate-800 transition-all"
@@ -336,20 +342,16 @@ export default function MateriPage() {
                 {openModules[module.id] ? <ChevronDown size={18} /> : <ChevronRight size={18} />}
               </button>
 
-              {/* DROPDOWN LIST: SUB-BAB MATERI */}
               {openModules[module.id] && (
                 <div className="pl-4 space-y-1">
                   {module.materi?.map((item) => {
                     const isActive = item.id == params.materiId;
-                    
                     return (
                       <div 
                         key={item.id} 
                         onClick={() => router.push(`/student/courses/${params.id}/materi/${item.id}`)}
                         className={`flex items-center gap-3 px-4 py-3 rounded-xl text-[11px] font-bold transition-all ${
-                          isActive 
-                            ? "bg-blue-600 text-white shadow-lg" 
-                            : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"
+                          isActive ? "bg-blue-600 text-white shadow-lg" : "text-slate-500 hover:bg-slate-800/50 cursor-pointer"
                         }`}
                       >
                         <FileText size={14} />
@@ -373,16 +375,8 @@ export default function MateriPage() {
                   Sebelum kita mempraktikkan kodenya, yuk kita pelajari dulu fondasi teorinya! 
                   Silakan baca dan pahami E-Book di bawah ini, yaa.
                 </p>
-
                 <div className="aspect-video rounded-[40px] overflow-hidden border-8 border-slate-900 shadow-2xl bg-black">
-                  <iframe 
-                    width="100%" 
-                    height="100%" 
-                    src={materi.video_url.includes('watch?v=') ? materi.video_url.replace('watch?v=', 'embed/') : materi.video_url} 
-                    title="Video" 
-                    frameBorder="0" 
-                    allowFullScreen 
-                  />
+                  <iframe width="100%" height="100%" src={materi.video_url.includes('watch?v=') ? materi.video_url.replace('watch?v=', 'embed/') : materi.video_url} title="Video" frameBorder="0" allowFullScreen />
                 </div>
               </div>
             )}
@@ -393,7 +387,6 @@ export default function MateriPage() {
               </article>
             </div>
 
-            {/* SEKSI REFLEKSI & SELF-ASSESSMENT */}
             {materi?.has_reflection && (
               <div className="mt-16 p-10 rounded-[40px] bg-purple-600/5 border border-purple-500/20 shadow-2xl relative">
                 <div className="flex items-center gap-3 mb-6">
@@ -412,14 +405,10 @@ export default function MateriPage() {
                                     key={index} 
                                     onClick={() => handleObjectiveTick(obj)}
                                     className={`flex items-center gap-4 p-5 rounded-2xl border transition-all duration-300 ${
-                                        selectedObjectives.includes(obj) 
-                                        ? "bg-blue-600/10 border-blue-500/50 text-white shadow-[0_0_20px_rgba(37,99,235,0.05)]" 
-                                        : "bg-slate-900/50 border-slate-800 text-slate-500"
+                                        selectedObjectives.includes(obj) ? "bg-blue-600/10 border-blue-500/50 text-white shadow-[0_0_20px_rgba(37,99,235,0.05)]" : "bg-slate-900/50 border-slate-800 text-slate-500"
                                     } ${!isSubmitted ? "cursor-pointer hover:border-slate-600" : "opacity-80 cursor-default"}`}
                                 >
-                                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${
-                                        selectedObjectives.includes(obj) ? "bg-blue-500 border-blue-500" : "border-slate-700"
-                                    }`}>
+                                    <div className={`w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all ${selectedObjectives.includes(obj) ? "bg-blue-500 border-blue-500" : "border-slate-700"}`}>
                                         {selectedObjectives.includes(obj) && <CheckCircle2 size={16} className="text-white" />}
                                     </div>
                                     <span className="text-sm font-bold italic tracking-tight">{obj}</span>
@@ -430,7 +419,7 @@ export default function MateriPage() {
                 )}
 
                 <h5 className="text-white font-bold text-2xl mb-6">{materi.reflection_question}</h5>
-                <textarea className="w-full bg-slate-950 border border-slate-800 p-8 rounded-[32px] text-white text-lg h-40 outline-none" value={userReflection} onChange={(e) => setUserReflection(e.target.value)} placeholder="Tulis responmu..." readOnly={false} />
+                <textarea className="w-full bg-slate-950 border border-slate-800 p-8 rounded-[32px] text-white text-lg h-40 outline-none" value={userReflection} onChange={(e) => setUserReflection(e.target.value)} placeholder="Tulis responmu..." />
                 <div className="mt-8 flex justify-end">
                   <button onClick={handleSendAssignment} className="bg-purple-600 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95">
                     <Save size={18} /> {isSubmitted ? "Perbarui" : "Kirim"}
@@ -439,7 +428,6 @@ export default function MateriPage() {
               </div>
             )}
 
-            {/* SEKSI TUGAS */}
             {materi?.assignment && (
               <div className="mt-16 p-10 rounded-[40px] bg-blue-600/5 border border-blue-500/20 shadow-2xl flex flex-col md:flex-row items-center gap-10">
                 <div className={`p-8 rounded-[32px] ${isSubmitted ? "bg-green-500/10 text-green-500" : "bg-blue-500/10 text-blue-400 animate-pulse"}`}>
@@ -455,7 +443,6 @@ export default function MateriPage() {
               </div>
             )}
 
-            {/* WORKSPACE AREA */}
             {showWorkspace && materi?.assignment && (
               <div className="mt-10 bg-slate-900 border border-slate-800 rounded-[40px] overflow-hidden flex flex-col h-[800px] shadow-2xl relative">
                 {isSubmitted && (
@@ -480,7 +467,6 @@ export default function MateriPage() {
                   {materi.assignment.type === 'flowchart' ? (
                     <ReactFlowProvider>
                       <div className="flex flex-1 overflow-hidden bg-slate-950">
-                        {/* ✅ OPER PROP onAddNodeMobile KE SIDEBAR */}
                         {!isSubmitted && <FlowchartSidebar onAddNodeMobile={onAddNodeMobile} />}
                         <div className="flex-1 relative">
                           <ReactFlow
@@ -496,6 +482,11 @@ export default function MateriPage() {
                             connectionMode="loose" 
                             deleteKeyCode={isSubmitted ? null : ["Backspace", "Delete"]}
                             fitView
+                            
+                            // ✅ OPTIMALISASI MOBILITAS SENTUHAN GUNA MENARIK GARIS DI SMARTPHONE
+                            panOnScroll={true}
+                            preventScrolling={false}
+                            zoomOnPinch={true}
                           >
                             <Background color="#334155" variant="dots"/>
                             <Controls className="!bg-slate-800 !border-slate-700 !fill-white"/>
@@ -532,7 +523,6 @@ export default function MateriPage() {
               </div>
             )}
 
-            {/* FOOTER NAVIGASI */}
             <div className="mt-32 mb-20 flex justify-between items-center border-t border-slate-900 pt-16">
               {prevMateriId ? <Link href={`/student/courses/${params.id}/materi/${prevMateriId}`} className="text-slate-500 hover:text-white font-black text-xs uppercase tracking-[0.2em] flex items-center gap-3 transition-all"><ArrowLeft size={20} /> Back</Link> : <div/>}
               {nextMateriId ? (
