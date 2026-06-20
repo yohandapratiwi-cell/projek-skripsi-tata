@@ -60,7 +60,6 @@ export default function MateriPage() {
   const [runCount, setRunCount] = useState(0);
   const [userInput, setUserInput] = useState("");
 
-  // ✅ STATE: Tujuan Pembelajaran yang dicentang
   const [selectedObjectives, setSelectedObjectives] = useState([]);
 
   const toggleModule = (modId) => {
@@ -99,13 +98,12 @@ export default function MateriPage() {
           const currentMod = currentCourse.modules.find(mod => mod.materi?.some(mat => mat.id === currentMateri.id));
           if (currentMod) setOpenModules(prev => ({ ...prev, [currentMod.id]: true }));
 
-          // Reset status default
           setIsSubmitted(false);
           setShowWorkspace(false);
           setCanGoNext(false);
           setTimeLeft(5);
           setUserReflection("");
-          setSelectedObjectives([]); // Reset centang sebelum restore
+          setSelectedObjectives([]);
           setRunCount(0);
           setUserInput("");
           setUserCode(currentMateri.assignment?.starter_code || "// Tulis kodemu di sini...");
@@ -113,7 +111,6 @@ export default function MateriPage() {
           setEdges([]);
           setTerminalOutput("");
 
-          // RESTORE DATA DARI DATABASE
           try {
             const subRes = await api.get(`/api/student/submission/${params.materiId}`);
             const subData = subRes.data;
@@ -127,7 +124,6 @@ export default function MateriPage() {
               setCanGoNext(true);
               setUserReflection(savedContent.reflection || "");
               
-              // ✅ RESTORE DATA CENTANG
               if (savedContent.achieved_objectives) {
                 setSelectedObjectives(savedContent.achieved_objectives);
               }
@@ -175,7 +171,6 @@ export default function MateriPage() {
     } else { setCanGoNext(isSubmitted); }
   }, [timeLeft, materi, isSubmitted]);
 
-  // LOG ACTIVITY
   useEffect(() => {
     const logActivity = async () => {
       try {
@@ -191,9 +186,7 @@ export default function MateriPage() {
     }
   }, [params?.materiId]);
 
-  // HANDLER CHECKBOX
   const handleObjectiveTick = (objectiveText) => {
-    //if (isSubmitted) return;
     setSelectedObjectives(prev => 
       prev.includes(objectiveText) 
       ? prev.filter(item => item !== objectiveText) 
@@ -234,6 +227,39 @@ export default function MateriPage() {
     setNodes((nds) => nds.concat(newNode));
   }, [reactFlowInstance, setNodes, isSubmitted]);
 
+  // ✅ HANDLER KHUSUS MOBILE: Menambahkan node ke area kerja melalui ketukan (Click-to-Add)
+  const onAddNodeMobile = useCallback((type, label) => {
+    if (isSubmitted) return;
+    
+    // Menaruh posisi node baru di koordinat tengah canvas pengerjaan siswa
+    const position = reactFlowInstance 
+      ? reactFlowInstance.getViewport()
+      : { x: 150, y: 150 };
+      
+    const computedPosition = reactFlowInstance
+      ? reactFlowInstance.screenToFlowPosition({ 
+          x: window.innerWidth / 2, 
+          y: window.innerHeight / 2 
+        })
+      : { x: position.x + 100, y: position.y + 100 };
+
+    const newNodeId = `node_${Date.now()}`;
+    const newNode = {
+      id: newNodeId,
+      type,
+      position: computedPosition,
+      data: {
+        label,
+        onChange: (newLabel) => {
+          setNodes((nds) =>
+            nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
+          );
+        }
+      }
+    };
+    setNodes((nds) => nds.concat(newNode));
+  }, [reactFlowInstance, setNodes, isSubmitted]);
+
   const handleRunCode = async () => {
     if (isCompiling || isSubmitted) return;
     setIsCompiling(true);
@@ -267,7 +293,7 @@ export default function MateriPage() {
         content: { 
             task: taskContent, 
             reflection: userReflection,
-            achieved_objectives: selectedObjectives // Kirim data centang
+            achieved_objectives: selectedObjectives
         },
         run_count: runCount
       });
@@ -343,13 +369,11 @@ export default function MateriPage() {
 
             {materi?.video_url && (
               <div className="mb-12">
-                {/* KALIMAT TAMBAHAN */}
                 <p className="text-slate-300 text-lg mb-6 font-medium bold">
                   Sebelum kita mempraktikkan kodenya, yuk kita pelajari dulu fondasi teorinya! 
                   Silakan baca dan pahami E-Book di bawah ini, yaa.
                 </p>
 
-                {/* VIDEO PLAYER */}
                 <div className="aspect-video rounded-[40px] overflow-hidden border-8 border-slate-900 shadow-2xl bg-black">
                   <iframe 
                     width="100%" 
@@ -377,7 +401,6 @@ export default function MateriPage() {
                   <span className="text-xs font-black text-purple-400 uppercase tracking-widest italic">Refleksi & Evaluasi Mandiri</span>
                 </div>
 
-                {/* ✅ UI CHECKBOX TUJUAN PEMBELAJARAN */}
                 {materi?.learning_objectives && Array.isArray(materi.learning_objectives) && materi.learning_objectives.length > 0 && (
                     <div className="mb-10 p-8 bg-slate-950/50 border border-slate-800 rounded-[32px]">
                         <label className="block text-[10px] font-black uppercase tracking-widest text-blue-500 mb-6 italic">
@@ -457,7 +480,8 @@ export default function MateriPage() {
                   {materi.assignment.type === 'flowchart' ? (
                     <ReactFlowProvider>
                       <div className="flex flex-1 overflow-hidden bg-slate-950">
-                        {!isSubmitted && <FlowchartSidebar />}
+                        {/* ✅ OPER PROP onAddNodeMobile KE SIDEBAR */}
+                        {!isSubmitted && <FlowchartSidebar onAddNodeMobile={onAddNodeMobile} />}
                         <div className="flex-1 relative">
                           <ReactFlow
                             nodes={nodes}
