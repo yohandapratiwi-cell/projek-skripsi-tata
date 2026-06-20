@@ -145,7 +145,7 @@ export default function MateriPage() {
                   ...node,
                   data: {
                     ...node.data,
-                    onDeleteMobile: () => handleDeleteNode(node.id), // Restore aksi hapus
+                    onDeleteMobile: () => handleDeleteNode(node.id), // Restore fungsi hapus manual
                     onChange: (newLabel) => {
                       setNodes((nds) =>
                         nds.map((n) => (n.id === node.id ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -225,7 +225,7 @@ export default function MateriPage() {
       id: newNodeId, type, position, 
       data: { 
         label,
-        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual
+        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual di drop desktop
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -257,7 +257,7 @@ export default function MateriPage() {
       position: computedPosition,
       data: {
         label,
-        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual di mobile
+        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual khusus mobile tap
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -482,8 +482,7 @@ export default function MateriPage() {
                             connectionMode="loose" 
                             deleteKeyCode={isSubmitted ? null : ["Backspace", "Delete"]}
                             fitView
-                            
-                            // ✅ OPTIMALISASI MOBILITAS SENTUHAN GUNA MENARIK GARIS DI SMARTPHONE
+                            connectOnClick={true}
                             panOnScroll={true}
                             preventScrolling={false}
                             zoomOnPinch={true}
