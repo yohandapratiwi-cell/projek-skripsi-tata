@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Handle, Position } from 'reactflow';
 
-// Komponen Label yang bisa diedit
 const EditableLabel = ({ label, onChange, placeholder, className }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [value, setValue] = useState(label || "");
@@ -39,6 +38,10 @@ const EditableLabel = ({ label, onChange, placeholder, className }) => {
         e.stopPropagation();
         setIsEditing(true);
       }} 
+      onTouchStart={(e) => {
+        e.stopPropagation();
+        setIsEditing(true);
+      }}
       className={`cursor-text select-none min-w-[20px] min-h-[1em] flex items-center justify-center text-center w-full h-full leading-tight ${className}`}
     >
       {value || <span className="opacity-30 italic">{placeholder}</span>}
@@ -46,16 +49,13 @@ const EditableLabel = ({ label, onChange, placeholder, className }) => {
   );
 };
 
-// HELPER: Base Wrapper untuk menangani multi-handle transparan
 const NodeWrapper = ({ children, colorClass }) => (
   <div className="relative group">
-    {/* Handle Transparan di 4 Sisi (Memungkinkan koneksi dari mana saja) */}
     <Handle type="source" position={Position.Top} id="t" className={`!opacity-0 group-hover:!opacity-100 !w-2 !h-2 !bg-${colorClass}`} />
     <Handle type="source" position={Position.Bottom} id="b" className={`!opacity-0 group-hover:!opacity-100 !w-2 !h-2 !bg-${colorClass}`} />
     <Handle type="source" position={Position.Left} id="l" className={`!opacity-0 group-hover:!opacity-100 !w-2 !h-2 !bg-${colorClass}`} />
     <Handle type="source" position={Position.Right} id="r" className={`!opacity-0 group-hover:!opacity-100 !w-2 !h-2 !bg-${colorClass}`} />
     
-    {/* Duplikasi sebagai Target (Agar bisa menerima input dari mana saja) */}
     <Handle type="target" position={Position.Top} id="t_t" className="!opacity-0" />
     <Handle type="target" position={Position.Bottom} id="b_t" className="!opacity-0" />
     <Handle type="target" position={Position.Left} id="l_t" className="!opacity-0" />
@@ -65,7 +65,6 @@ const NodeWrapper = ({ children, colorClass }) => (
   </div>
 );
 
-// 1. Start/End Node (Oval/Capsule)
 export const StartNode = ({ data }) => (
   <NodeWrapper colorClass="green-400">
     <div className="px-6 py-2 rounded-full border-2 border-green-500 bg-slate-900/90 text-green-400 shadow-[0_0_15px_rgba(34,197,94,0.3)] min-w-[120px]">
@@ -79,7 +78,6 @@ export const StartNode = ({ data }) => (
   </NodeWrapper>
 );
 
-// 2. Process Node (Rectangle)
 export const ProcessNode = ({ data }) => (
   <NodeWrapper colorClass="blue-400">
     <div className="px-4 py-4 border-2 border-blue-500 bg-slate-900/90 text-blue-400 shadow-[0_0_15px_rgba(59,130,246,0.3)] min-w-[140px]">
@@ -93,7 +91,6 @@ export const ProcessNode = ({ data }) => (
   </NodeWrapper>
 );
 
-// 3. Decision Node (Diamond)
 export const DecisionNode = ({ data }) => (
   <NodeWrapper colorClass="yellow-400">
     <div className="flex items-center justify-center p-4">
@@ -112,7 +109,6 @@ export const DecisionNode = ({ data }) => (
   </NodeWrapper>
 );
 
-// 4. Input/Output Node (Parallelogram) - FIX BACKGROUND PUTIH
 export const InputOutputNode = ({ data }) => (
   <NodeWrapper colorClass="purple-400">
     <div className="relative py-3 px-8 bg-transparent overflow-visible">
