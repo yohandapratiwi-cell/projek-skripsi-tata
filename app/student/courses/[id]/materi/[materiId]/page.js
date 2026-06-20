@@ -66,12 +66,11 @@ export default function MateriPage() {
     setOpenModules(prev => ({ ...prev, [modId]: !prev[modId] }));
   };
 
-  // ✅ AKSI HAPUS NODE KHUSUS MOBILE / DESKTOP (Tombol X Manual)
+  // ✅ FIX 1: Mengunci handleDeleteNode dengan dependensi kosong agar referensi fungsi stabil dan tidak memicu flickering
   const handleDeleteNode = useCallback((nodeId) => {
-    if (isSubmitted) return;
     setNodes((nds) => nds.filter((n) => n.id !== nodeId));
     setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
-  }, [setNodes, setEdges, isSubmitted]);
+  }, [setNodes, setEdges]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -145,7 +144,7 @@ export default function MateriPage() {
                   ...node,
                   data: {
                     ...node.data,
-                    onDeleteMobile: () => handleDeleteNode(node.id), // Restore fungsi hapus manual
+                    onDeleteMobile: () => handleDeleteNode(node.id),
                     onChange: (newLabel) => {
                       setNodes((nds) =>
                         nds.map((n) => (n.id === node.id ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -166,7 +165,8 @@ export default function MateriPage() {
     };
     
     if (params?.id && params?.materiId) fetchData();
-  }, [params.id, params.materiId, handleDeleteNode]);
+    // ✅ FIX 2: Hapus dependensi dinamis yang memicu loop berulang-ulang
+  }, [params.id, params.materiId]);
 
   useEffect(() => {
     if (!materi) return;
@@ -202,9 +202,11 @@ export default function MateriPage() {
     );
   };
 
-  const onConnect = useCallback((params) => {
+  // ✅ FIX 3: Validasi onConnect agar mencegah tarikan garis ke node itu sendiri (Self-Looping)
+  const onConnect = useCallback((connection) => {
     if (isSubmitted) return;
-    setEdges((eds) => addEdge(params, eds));
+    if (connection.source === connection.target) return; // Proteksi pemutusan koneksi diri sendiri
+    setEdges((eds) => addEdge(connection, eds));
   }, [setEdges, isSubmitted]);
 
   const onDragOver = useCallback((event) => {
@@ -225,7 +227,7 @@ export default function MateriPage() {
       id: newNodeId, type, position, 
       data: { 
         label,
-        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual di drop desktop
+        onDeleteMobile: () => handleDeleteNode(newNodeId),
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
@@ -257,7 +259,7 @@ export default function MateriPage() {
       position: computedPosition,
       data: {
         label,
-        onDeleteMobile: () => handleDeleteNode(newNodeId), // Tempel aksi hapus manual khusus mobile tap
+        onDeleteMobile: () => handleDeleteNode(newNodeId),
         onChange: (newLabel) => {
           setNodes((nds) =>
             nds.map((n) => (n.id === newNodeId ? { ...n, data: { ...n.data, label: newLabel } } : n))
