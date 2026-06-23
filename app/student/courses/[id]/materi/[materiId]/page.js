@@ -62,11 +62,13 @@ export default function MateriPage() {
 
   const [selectedObjectives, setSelectedObjectives] = useState([]);
 
+  // ✅ STATE BARU: Menampung data umpan balik guru agar bisa ditampilkan ke siswa
+  const [teacherFeedback, setTeacherFeedback] = useState("");
+
   const toggleModule = (modId) => {
     setOpenModules(prev => ({ ...prev, [modId]: !prev[modId] }));
   };
 
-  // ✅ FIX 1: Mengunci handleDeleteNode dengan dependensi kosong agar referensi fungsi stabil dan tidak memicu flickering
   const handleDeleteNode = useCallback((nodeId) => {
     setNodes((nds) => nds.filter((n) => n.id !== nodeId));
     setEdges((eds) => eds.filter((e) => e.source !== nodeId && e.target !== nodeId));
@@ -116,6 +118,7 @@ export default function MateriPage() {
           setNodes([]);
           setEdges([]);
           setTerminalOutput("");
+          setTeacherFeedback(""); // Reset state feedback setiap materi berpindah
 
           try {
             const subRes = await api.get(`/api/student/submission/${params.materiId}`);
@@ -129,6 +132,11 @@ export default function MateriPage() {
               setIsSubmitted(true);
               setCanGoNext(true);
               setUserReflection(savedContent.reflection || "");
+              
+              // ✅ AUTOMATIC RESTORE: Tangkap properti teacher_feedback jika sudah diisi oleh guru
+              if (savedContent.teacher_feedback) {
+                setTeacherFeedback(savedContent.teacher_feedback);
+              }
               
               if (savedContent.achieved_objectives) {
                 setSelectedObjectives(savedContent.achieved_objectives);
@@ -165,7 +173,6 @@ export default function MateriPage() {
     };
     
     if (params?.id && params?.materiId) fetchData();
-    // ✅ FIX 2: Hapus dependensi dinamis yang memicu loop berulang-ulang
   }, [params.id, params.materiId]);
 
   useEffect(() => {
@@ -202,10 +209,9 @@ export default function MateriPage() {
     );
   };
 
-  // ✅ FIX 3: Validasi onConnect agar mencegah tarikan garis ke node itu sendiri (Self-Looping)
   const onConnect = useCallback((connection) => {
     if (isSubmitted) return;
-    if (connection.source === connection.target) return; // Proteksi pemutusan koneksi diri sendiri
+    if (connection.source === connection.target) return; 
     setEdges((eds) => addEdge(connection, eds));
   }, [setEdges, isSubmitted]);
 
@@ -303,7 +309,9 @@ export default function MateriPage() {
         content: { 
             task: taskContent, 
             reflection: userReflection,
-            achieved_objectives: selectedObjectives
+            achieved_objectives: selectedObjectives,
+            // ✅ FIX: Ikut sertakan state feedback guru agar tidak tertimpa kosong di DO UPDATE backend
+            teacher_feedback: teacherFeedback 
         },
         run_count: runCount
       });
@@ -389,6 +397,7 @@ export default function MateriPage() {
               </article>
             </div>
 
+            {/* SEKSI REFLEKSI & SELF-ASSESSMENT */}
             {materi?.has_reflection && (
               <div className="mt-16 p-10 rounded-[40px] bg-purple-600/5 border border-purple-500/20 shadow-2xl relative">
                 <div className="flex items-center gap-3 mb-6">
@@ -422,11 +431,29 @@ export default function MateriPage() {
 
                 <h5 className="text-white font-bold text-2xl mb-6">{materi.reflection_question}</h5>
                 <textarea className="w-full bg-slate-950 border border-slate-800 p-8 rounded-[32px] text-white text-lg h-40 outline-none" value={userReflection} onChange={(e) => setUserReflection(e.target.value)} placeholder="Tulis responmu..." />
+                
                 <div className="mt-8 flex justify-end">
                   <button onClick={handleSendAssignment} className="bg-purple-600 text-white px-10 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center gap-2 transition-all active:scale-95">
                     <Save size={18} /> {isSubmitted ? "Perbarui" : "Kirim"}
                   </button>
                 </div>
+
+                {/* ✅ BOX UI BARU: Hanya muncul di bawah tombol jika guru sudah mengisi feedback */}
+                {teacherFeedback && (
+                  <div className="mt-10 pt-8 border-t border-purple-500/10 flex flex-col gap-3">
+                    <div className="flex items-center gap-2 text-emerald-400">
+                      <span className="text-[10px] font-black uppercase tracking-widest italic bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded-md">
+                        Respon / Umpan Balik Guru
+                      </span>
+                    </div>
+                    <div className="bg-slate-950/80 p-6 rounded-2xl border border-emerald-500/20 shadow-md">
+                      <p className="text-xs text-slate-400 font-bold leading-relaxed whitespace-pre-wrap">
+                        {teacherFeedback}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
               </div>
             )}
 
