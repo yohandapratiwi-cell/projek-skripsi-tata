@@ -128,12 +128,11 @@ export default function MateriPage() {
               const savedContent = typeof subData.data.content === 'string' 
                 ? JSON.parse(subData.data.content) 
                 : subData.data.content;
-
+            
               setIsSubmitted(true);
               setCanGoNext(true);
               setUserReflection(savedContent.reflection || "");
               
-              // ✅ AUTOMATIC RESTORE: Tangkap properti teacher_feedback jika sudah diisi oleh guru
               if (savedContent.teacher_feedback) {
                 setTeacherFeedback(savedContent.teacher_feedback);
               }
@@ -142,7 +141,7 @@ export default function MateriPage() {
                 setSelectedObjectives(savedContent.achieved_objectives);
               }
               
-              setRunCount(subData.data.run_count || 0);
+              setRunCount(savedContent.run_count || 0);
 
               if (currentMateri.assignment?.type === 'code') {
                 setUserCode(savedContent.task?.code || "");
@@ -310,10 +309,9 @@ export default function MateriPage() {
             task: taskContent, 
             reflection: userReflection,
             achieved_objectives: selectedObjectives,
-            // ✅ FIX: Ikut sertakan state feedback guru agar tidak tertimpa kosong di DO UPDATE backend
-            teacher_feedback: teacherFeedback 
-        },
-        run_count: runCount
+            teacher_feedback: teacherFeedback,
+            run_count: runCount 
+        }
       });
   
       if (res.status === 200 || res.status === 201) {
