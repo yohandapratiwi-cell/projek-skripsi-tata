@@ -16,10 +16,8 @@ export default function DetailedTestResults() {
     const fetchResults = async () => {
       try {
         setLoading(true);
-        // ✅ PERBAIKAN: Pastikan mengarah ke /api/tests/...
         const res = await api.get(`/api/tests/results/${params.testType}/${params.courseId}`);
         
-        // Unwrapping data sesuai format backend { status, data }
         const dataResult = res.data?.data || res.data || [];
         setResults(Array.isArray(dataResult) ? dataResult : []);
       } catch (err) {
@@ -60,7 +58,7 @@ export default function DetailedTestResults() {
           <h1 className="text-4xl font-black uppercase tracking-tighter">
             Rekap Nilai {params.testType}
           </h1>
-          <p className="text-slate-500 italic mt-1 font-medium">Data pengerjaan otomatis oleh sistem.</p>
+          <p className="text-slate-500 italic mt-1 font-medium"></p>
         </div>
         <div className="relative w-full md:w-80">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
@@ -99,7 +97,9 @@ export default function DetailedTestResults() {
                     </div>
                   </td>
                   <td className="p-8 text-sm text-slate-400 font-medium">{r.test_title}</td>
-                  <td className="p-8 text-xs text-slate-500 font-mono italic">{r.submitted_at}</td>
+                  <td className="p-8 text-xs text-slate-500 font-mono italic">
+                    {r.submitted_at ? r.submitted_at.split(',')[0] : "-"}
+                  </td>
                   <td className="p-8 text-center">
                     <div className="inline-flex items-center gap-3 bg-slate-950 px-5 py-2 rounded-2xl border border-slate-800">
                       <Trophy size={16} className={r.score >= 75 ? "text-yellow-500" : "text-slate-600"} />
