@@ -60,7 +60,7 @@ export default function ClassCompetencyRadar() {
         
         const formattedData = rawData.map((modul) => ({
           ...modul,
-          display_label: modul.materi_title.length > 10 ? modul.materi_title.split(' ')[0] : modul.materi_title
+          display_label: modul.module_title || modul.materi_title
         }));
 
         setData(formattedData);
